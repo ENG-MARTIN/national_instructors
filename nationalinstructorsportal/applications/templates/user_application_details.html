@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Details | {{ application.surname }} {{ application.other_names }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .application-card {
+            {% comment %} max-width: 1000px; {% endcomment %}
+            margin: 2rem auto;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .section-card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-header i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .section-body {
+            padding: 1.5rem;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px dashed #e9ecef;
+        }
+        
+        .info-label {
+            flex: 0 0 200px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #495057;
+        }
+        
+        .list-item {
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            background-color: white;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .list-item-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .list-item-period {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-link {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .contact-link:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .info-row {
+                flex-direction: column;
+            }
+            
+            .info-label {
+                flex: 1;
+                margin-bottom: 0.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class=" py-4">
+        <div class="card application-card">
+            <!-- Application Header -->
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-1">{{ application.surname }} {{ application.other_names }}</h4>
+                    <p class="mb-0">Application #{{ application.id }}</p>
+                </div>
+                <span class="status-badge 
+                    {% if application.status == 'Pending' %} bg-warning text-dark
+                    {% elif application.status == 'Approved' %} bg-success text-white
+                    {% elif application.status == 'Rejected' %} bg-danger text-white
+                    {% else %} bg-secondary text-white {% endif %}">
+                    <i class="fas fa-{% if application.status == 'Pending' %}clock{% elif application.status == 'Approved' %}check-circle{% elif application.status == 'Rejected' %}times-circle{% else %}info-circle{% endif %} me-1"></i>
+                    {{ application.status }}
+                </span>
+            </div>
+            
+            <div class="card-body">
+                <!-- Personal Information Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="fas fa-user"></i>
+                        <span>Personal Information</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-row">
+                                    <div class="info-label">Gender</div>
+                                    <div class="info-value">{{ application.gender }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Date of Birth</div>
+                                    <div class="info-value">{{ application.date_of_birth }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Nationality</div>
+                                    <div class="info-value">{{ application.nationality }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Marital Status</div>
+                                    <div class="info-value">{{ application.marital_status }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-row">
+                                    <div class="info-label">Phone</div>
+                                    <div class="info-value">
+                                        <a href="tel:{{ application.phone }}" class="contact-link">
+                                            <i class="fas fa-phone me-1"></i>{{ application.phone }}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">
+                                        <a href="mailto:{{ application.email }}" class="contact-link">
+                                            <i class="fas fa-envelope me-1"></i>{{ application.email }}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Religion</div>
+                                    <div class="info-value">{{ application.religion }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Children</div>
+                                    <div class="info-value">{{ application.children }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-row">
+                            <div class="info-label">Home Address</div>
+                            <div class="info-value">{{ application.home_district }}, {{ application.county }}, {{ application.sub_county }}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Permanent Address</div>
+                            <div class="info-value">{{ application.permanent_address }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education Background Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Education Background</span>
+                    </div>
+                    <div class="section-body">
+                        {% if application.education_backgrounds %}
+                            {% for education in application.education_backgrounds %}
+                            <div class="list-item">
+                                <div class="list-item-title">{{ education.school }}</div>
+                                <div class="list-item-period">
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    {{ education.start_year }} - {{ education.end_year }}
+                                </div>
+                                <div>
+                                    <span class="fw-medium">{{ education.qualification }}</span> - 
+                                    <span class="text-success fw-bold">{{ education.grade }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-light">No education information provided</div>
+                        {% endif %}
+                        
+                        <div class="info-row">
+                            <div class="info-label">Major Subjects</div>
+                            <div class="info-value">{{ application.major_subjects }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employment Record Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Employment Record</span>
+                    </div>
+                    <div class="section-body">
+                        {% if application.employment_records %}
+                            {% for job in application.employment_records %}
+                            <div class="list-item">
+                                <div class="list-item-title">{{ job.position }} at {{ job.company }}</div>
+                                <div class="list-item-period">
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    {{ job.start_year }} - {{ job.end_year }}
+                                </div>
+                                {% if job.responsibilities %}
+                                <div class="mt-2">
+                                    <div class="fw-medium mb-1">Responsibilities:</div>
+                                    <div>{{ job.responsibilities }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-light">No employment records provided</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Programme & Sponsorship Section -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="section-card h-100">
+                            <div class="section-header">
+                                <i class="fas fa-book"></i>
+                                <span>Programme Details</span>
+                            </div>
+                            <div class="section-body">
+                                <div class="info-row">
+                                    <div class="info-label">Programme</div>
+                                    <div class="info-value">{{ application.get_programme_display }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Programme Status</div>
+                                    <div class="info-value">{{ application.programme_status }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="section-card h-100">
+                            <div class="section-header">
+                                <i class="fas fa-hand-holding-usd"></i>
+                                <span>Sponsorship</span>
+                            </div>
+                            <div class="section-body">
+                                <div class="info-row">
+                                    <div class="info-label">Sponsor Name</div>
+                                    <div class="info-value">{{ application.sponsor_name }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Sponsor Address</div>
+                                    <div class="info-value">{{ application.sponsor_address }}</div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Sponsor Phone</div>
+                                    <div class="info-value">
+                                        <a href="tel:{{ application.sponsor_phone }}" class="contact-link">
+                                            <i class="fas fa-phone me-1"></i>{{ application.sponsor_phone }}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-label">Sponsor Email</div>
+                                    <div class="info-value">
+                                        <a href="mailto:{{ application.sponsor_email }}" class="contact-link">
+                                            <i class="fas fa-envelope me-1"></i>{{ application.sponsor_email }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Declaration Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="fas fa-file-signature"></i>
+                        <span>Declaration & Endorsement</span>
+                    </div>
+                    <div class="section-body">
+                        {% if application.declaration_signature %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-row">
+                                        <div class="info-label">Declaration Signature</div>
+                                        <div class="info-value">{{ application.declaration_signature }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-row">
+                                        <div class="info-label">Endorser Name</div>
+                                        <div class="info-value">{{ application.endorser_name }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Endorser Designation</div>
+                                <div class="info-value">{{ application.endorser_designation }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Endorser Institution</div>
+                                <div class="info-value">{{ application.endorser_institution }}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Endorser Address</div>
+                                <div class="info-value">{{ application.endorser_address }}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-row">
+                                        <div class="info-label">Endorser Signature</div>
+                                        <div class="info-value">{{ application.endorser_signature }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-row">
+                                        <div class="info-label">Official Stamp</div>
+                                        <div class="info-value">{{ application.official_stamp }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-light">Declaration details not yet completed</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'apply_ditte' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Applications
+                    </a>
+                    <div>
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-download me-2"></i>Download PDF
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-print me-2"></i>Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Print functionality
+        document.querySelector('.btn-primary').addEventListener('click', function() {
+            window.print();
+        });
+        
+        // PDF download functionality would be implemented here
+    </script>
+</body>
+</html>

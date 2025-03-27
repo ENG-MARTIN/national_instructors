@@ -1,0 +1,474 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | NATIONAL INSTRUCTORS' COLLEGE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand img {
+            margin-right: 10px;
+        }
+        
+        .sidebar {
+            background-color: white;
+            min-height: calc(100vh - 56px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: var(--dark-color);
+            border-radius: 5px;
+            margin-bottom: 5px;
+            padding: 10px 15px;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-card .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .bg-pending {
+            background-color: #f39c12 !important;
+        }
+        
+        .bg-reviewing {
+            background-color: #3498db !important;
+        }
+        
+        .bg-approved {
+            background-color: #2ecc71 !important;
+        }
+        
+        .bg-rejected {
+            background-color: #e74c3c !important;
+        }
+        
+        .bg-onhold {
+            background-color: #9b59b6 !important;
+        }
+        
+        .recent-applications {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .badge {
+            padding: 6px 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/logo.jpeg' %}" alt="College Logo" height="40" class="d-inline-block align-top">
+                NATIONAL INSTRUCTORS' COLLEGE
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge bg-danger rounded-pill">3</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            <li><a class="dropdown-item" href="#">5 new applications</a></li>
+                            <li><a class="dropdown-item" href="#">3 pending reviews</a></li>
+                            <li><a class="dropdown-item" href="#">System update available</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i> {{ request.user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'admin:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <div class="d-flex flex-column p-3">
+                    <ul class="nav nav-pills flex-column mb-auto">
+                        <li class="nav-item">
+                            <a href="{% url 'admin_dashboard' %}" class="nav-link active">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'view_applications' %}" class="nav-link">
+                                <i class="fas fa-file-alt"></i> Applications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'user_management' %}" class="nav-link">
+                                <i class="fas fa-users"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'reports' %}" class="nav-link">
+                                <i class="fas fa-chart-bar"></i> Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'settings' %}" class="nav-link">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted">Version 2.1.0</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <h2 class="mb-4">Dashboard Overview</h2>
+                
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="stat-value">{{ total_applications }}</div>
+                                <div class="stat-label">Total Applications</div>
+                                <i class="fas fa-file-alt fa-2x mt-3 text-primary"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="stat-value">{{ pending_applications }}</div>
+                                <div class="stat-label">Pending</div>
+                                <i class="fas fa-clock fa-2x mt-3 text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="stat-value">{{ approved_applications }}</div>
+                                <div class="stat-label">Approved</div>
+                                <i class="fas fa-check-circle fa-2x mt-3 text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="stat-value">{{ rejected_applications }}</div>
+                                <div class="stat-label">Rejected</div>
+                                <i class="fas fa-times-circle fa-2x mt-3 text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Status Chart -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Application Status Overview</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="statusChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body">
+                                <a href="{% url 'view_applications' %}" class="btn btn-primary w-100 mb-2">
+                                    <i class="fas fa-search me-2"></i> Review Applications
+                                </a>
+                                <a href="{% url 'user_management' %}" class="btn btn-secondary w-100 mb-2">
+                                    <i class="fas fa-user-plus me-2"></i> Add New User
+                                </a>
+                                <a href="{% url 'reports' %}" class="btn btn-success w-100 mb-2">
+                                    <i class="fas fa-download me-2"></i> Generate Reports
+                                </a>
+                                <a href="#" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                                    <i class="fas fa-users me-2"></i> Bulk Assign
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Applications and User Stats -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">Recent Applications</h5>
+                                <a href="{% url 'view_applications' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                            <div class="card-body recent-applications">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Name</th>
+                                                <th>Programme</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for app in recent_applications %}
+                                            <tr>
+                                                <td>#{{ app.id }}</td>
+                                                <td>{{ app.surname }} {{ app.other_names }}</td>
+                                                <td>{{ app.get_programme_display }}</td>
+                                                <td>{{ app.created_at|date:"M d, Y" }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if app.status == 'pending' %}bg-warning
+                                                        {% elif app.status == 'reviewing' %}bg-info
+                                                        {% elif app.status == 'approved' %}bg-success
+                                                        {% elif app.status == 'rejected' %}bg-danger
+                                                        {% else %}bg-secondary{% endif %}">
+                                                        {{ app.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'view_application' app.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">User Statistics</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h6>Total Users: {{ total_users }}</h6>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: {{ admin_percentage }}%">{{ admin_users }} Admins</div>
+                                        <div class="progress-bar bg-primary" style="width: {{ staff_percentage }}%">{{ staff_users }} Staff</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <h6>Active Today: {{ active_today }}</h6>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: {{ active_percentage }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <h6>New This Week: {{ new_this_week }}</h6>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: {{ new_user_percentage }}%"></div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6>User Activity</h6>
+                                <ul class="list-group list-group-flush">
+                                    {% for activity in recent_activity %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ activity.user.username }}
+                                        <small class="text-muted">{{ activity.timestamp|timesince }} ago</small>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Assign Modal -->
+    <div class="modal fade" id="bulkAssignModal" tabindex="-1" aria-labelledby="bulkAssignModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkAssignModalLabel">Bulk Assign Applications</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="assigned_to" class="form-label">Assign to:</label>
+                            <select name="assigned_to" id="assigned_to" class="form-select" required>
+                                <option value="">----- Select Staff Member -----</option>
+                                {% for user in available_users %}
+                                <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Update Status to:</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">Don't change</option>
+                                <option value="pending">Pending</option>
+                                <option value="reviewing">Under Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="on_hold">On Hold</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="add_note" class="form-label">Additional Notes:</label>
+                            <textarea name="add_note" id="add_note" class="form-control" rows="4" placeholder="Enter any notes..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Assign Applications</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Application Status Chart
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        const statusChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Under Review', 'Approved', 'Rejected', 'On Hold'],
+                datasets: [{
+                    data: [
+                        {{ pending_applications }},
+                        {{ reviewing_applications }},
+                        {{ approved_applications }},
+                        {{ rejected_applications }},
+                        {{ onhold_applications }}
+                    ],
+                    backgroundColor: [
+                        '#f39c12',
+                        '#3498db',
+                        '#2ecc71',
+                        '#e74c3c',
+                        '#9b59b6'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw + ' (' + Math.round(context.parsed * 100 / context.dataset.data.reduce((a, b) => a + b, 0)) + '%)';
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
