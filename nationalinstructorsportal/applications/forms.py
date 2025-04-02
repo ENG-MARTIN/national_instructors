@@ -1,6 +1,8 @@
 from django import forms
-from .models import Application
+from .models import Admin, Application
 from .models import CustomUser
+from django.contrib.auth.forms import UserCreationForm
+
 
 class DITTEApplicationForm(forms.ModelForm):
     class Meta:
@@ -59,3 +61,15 @@ class RegisterForm(forms.ModelForm):
 
         return cleaned_data
     
+
+    # admin register
+
+class AdminRegisterForm(UserCreationForm):
+    email = forms.EmailField()
+    role = forms.CharField(max_length=50)
+    full_name = forms.CharField(max_length=100)
+    phone_number = forms.CharField(max_length=15)
+
+    class Meta:
+        model = Admin
+        fields = ['email', 'password1', 'password2', 'role', 'full_name', 'phone_number']

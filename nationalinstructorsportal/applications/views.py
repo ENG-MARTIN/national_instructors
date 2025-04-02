@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages
-from .models import Application, CustomUser
-from .forms import RegisterForm
+from .models import Admin, Application, CustomUser
+from .forms import AdminRegisterForm, RegisterForm
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -13,13 +13,16 @@ from django.contrib.auth import authenticate, login, get_user_model
 from django.http import HttpResponseForbidden
 import logging
 import uuid
+from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 import json
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-
+from django.contrib.auth.hashers import make_password
+from django.db.models import Count
+from django.views.decorators.http import require_http_methods
 
 # Create your views here.
 
@@ -36,31 +39,96 @@ def login_view(request):
         User = get_user_model()
 
         try:
-            user = User.objects.get(email=email)  # Check if user exists
+            user = User.objects.get(email=email)
         except User.DoesNotExist:
             messages.error(request, "No user found with this email.")
             return render(request, 'login.html')
 
-        if user.check_password(password):  # Verify hashed password
+        if user.check_password(password):
             login(request, user)
 
-            # Store user details in session
+            # Store user data in session using email only (no ID)
             request.session['user_data'] = {
-                'id': str(user.id),  # Convert UUID to string
                 'email': user.email,
                 'surname': user.surname,
                 'other_names': user.other_names,
                 'phone': user.phone,
                 'nationality': user.nationality,
-                'dob': str(user.dob),  # Convert date to string
+                'dob': user.dob.isoformat() if user.dob else None,
                 'sex': user.sex,
             }
-
-            return redirect('apply_ditte')  # Redirect after login
+            return redirect('apply_ditte')
         else:
             messages.error(request, "Invalid password. Please try again.")
 
     return render(request, 'login.html')
+
+def adminLogin_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        try:
+            user = Admin.objects.get(email=email)
+            if user.check_password(password):
+                # Manually create session (without django.contrib.auth.login)
+                request.session['admin_id'] = user.id
+                request.session['admin_email'] = user.email
+                request.session['admin_name'] = user.full_name
+                request.session['is_admin_logged_in'] = True
+                
+                return redirect('admin_dashboard')
+            else:
+                messages.error(request, "Invalid password. Please try again.")
+        except Admin.DoesNotExist:
+            messages.error(request, "No admin found with this email.")
+
+    return render(request, 'adminlogin.html')
+
+
+# admin register
+def register_admin(request):
+    if request.method == 'POST':
+        # Get data from POST request
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+        role = request.POST.get('role')
+        full_name = request.POST.get('full_name')
+        phone_number = request.POST.get('phone_number')
+
+        # Validation checks
+        if password != password2:
+            messages.error(request, "Passwords do not match.")
+            return redirect('register_admin')
+
+        if not email or not password or not role or not full_name or not phone_number:
+            messages.error(request, "All fields are required.")
+            return redirect('register_admin')
+
+        # Create and save the admin instance
+        try:
+            hashed_password = make_password(password)  # Hash the password before saving
+
+            admin = Admin(
+                email=email,
+                password=hashed_password,
+                role=role,
+                full_name=full_name,
+                phone_number=phone_number
+            )
+            admin.save()
+
+            messages.success(request, "Admin registered successfully!")
+            return redirect('adminlogin')  # Redirect to admin login page
+
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect('register_admin')
+    else:
+        return render(request, 'admin_register.html')
+
+# 
 
 def register(request):
     errors = None  # Initialize error variable
@@ -194,10 +262,40 @@ def view_application_details(request, application_id):
 
 
 def admin(request):
-    return render(request,'admin.html')
+    if 'admin_email' not in request.session:
+        return redirect('adminlogin')  # Force login if no session
+    
+    email = request.session['admin_email']
+    
+    try:
+        user = Admin.objects.get(email=email)
+    except Admin.DoesNotExist:
+        del request.session['admin_email'] 
+        return redirect('adminlogin')
+    
+    return render(request,'admin.html',{'user': user})
 
 def admin_dashboard(request):
-    return render(request,'admin.html')
+    return render(request, 'admin.html')
+
+
+# View administrators View
+def admin_list_view(request):
+    applications = Application.objects.all()
+    paginator = Paginator(applications, 10)  # Show 10 applications per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'administrators.html', {'page_obj': page_obj})
+
+def admin_edit_view(request, pk):  # pk will be an integer
+    admin = get_object_or_404(Admin, pk=pk)
+    # ... rest of your edit logic
+
+
+def admin_delete_view(request, pk):
+    admin = get_object_or_404(Admin, pk=pk)
+    # ... rest of your delete logic
+
 
 # View Applications View
 def view_applications(request):
@@ -224,15 +322,70 @@ def user_management(request):
     users = CustomUser.objects.all()
     return render(request, 'user_management.html', {'users': users})
 
+# Admin Management View
+def admin_management(request):
+    users = Admin.objects.all()
+    return render(request, 'administrators.html', {'users': users})
+
+
 # Reports View
-@login_required
+# @login_required
 def reports(request):
-    # Fetch report data from the database (example)
-    reports = [
-        {'id': 1, 'name': 'Report 1', 'type': 'Monthly'},
-        {'id': 2, 'name': 'Report 2', 'type': 'Annual'},
-    ]
-    return render(request, 'reports.html', {'reports': reports})
+    applications = Application.objects.all()
+    
+    # Status statistics
+    status_stats = applications.values('status').annotate(count=Count('status'))
+    status_choices = dict(Application.STATUS_CHOICES)
+    
+    programme_stats = applications.values('programme').annotate(count=Count('programme'))
+    programme_choices = dict(Application._meta.get_field('programme').choices)
+    
+    gender_stats = applications.values('gender').annotate(count=Count('gender'))
+    
+    recent_applications = applications.order_by('-id')[:5]
+    
+    programme_status_stats = applications.values('programme_status').annotate(count=Count('programme_status'))
+    
+    context = {
+        'total_applications': applications.count(),
+        'status_stats': {stat['status']: stat['count'] for stat in status_stats},
+        'status_choices': status_choices,
+        'programme_stats': {stat['programme']: stat['count'] for stat in programme_stats},
+        'programme_choices': programme_choices,
+        'gender_stats': {stat['gender']: stat['count'] for stat in gender_stats},
+        'programme_status_stats': {stat['programme_status']: stat['count'] for stat in programme_status_stats},
+        'recent_applications': recent_applications,
+    }
+    return render(request, 'reports.html', context)
+
+# ----------------------------------------  this is editing the application on admin       -----------
+@csrf_exempt
+def get_application(request, pk):
+    try:
+        application = Application.objects.get(pk=pk)
+        return JsonResponse({
+            'endorser_name': application.endorser_name,
+            'endorser_designation': application.endorser_designation,
+            'endorser_institution': application.endorser_institution,
+            'endorser_address': application.endorser_address
+        })
+    except Application.DoesNotExist:
+        return JsonResponse({'error': 'Application not found'}, status=404)
+
+@csrf_exempt
+def update_endorser_details(request):
+    if request.method == 'POST':
+        try:
+            application = Application.objects.get(pk=request.POST.get('application_id'))
+            application.endorser_name = request.POST.get('endorser_name', '')
+            application.endorser_designation = request.POST.get('endorser_designation', '')
+            application.endorser_institution = request.POST.get('endorser_institution', '')
+            application.endorser_address = request.POST.get('endorser_address', '')
+            application.save()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=400)
+    return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
 
 # Settings View
 @login_required

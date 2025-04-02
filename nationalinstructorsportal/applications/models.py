@@ -1,6 +1,7 @@
 from django.db import models
 # from . import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser
+
 import uuid
 
 # Create your models here.
@@ -138,3 +139,20 @@ class CustomUser(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+    
+
+    # custom admin model
+
+class Admin(AbstractUser):
+    # Remove the password field (it's already in AbstractUser)
+    role = models.CharField(max_length=50)
+    full_name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=15, unique=True)
+
+    # Use email as the username field
+    USERNAME_FIELD = 'email'
+    # Require these fields when creating a user
+    REQUIRED_FIELDS = ['full_name', 'role', 'phone_number', 'username']  # Add username here
+
+    def __str__(self):
+        return self.full_name

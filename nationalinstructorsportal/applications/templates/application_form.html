@@ -11,8 +11,9 @@
         body {
             background-color: #f8f9fa;
         }
-        .container1 {
+        .container{
             margin: 20px;
+
 
         }
         .card {
@@ -43,6 +44,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+
         }
         .step {
             display: none;
@@ -64,7 +66,7 @@
     </style>
 </head>
 <body class="bg-light">
-    <div class="container1">
+    <div class="container">
         <div class="card">
             <div class="card-header bg-primary text-white text-center">
                 <h3>DITTE Application Form</h3>
@@ -215,6 +217,7 @@
                                     <label class="form-label">Major Subjects</label>
                                     <input type="text" class="form-control" name="major_subjects" required>
                                 </div>
+                                <br>
                                 <button type="button" class="btn btn-secondary prev-step" data-prev="1">Previous</button>
                                 <button type="button" class="btn btn-primary next-step" data-next="3">Next</button>
                             </div>
@@ -245,6 +248,8 @@
         </table>
     </div>
     <button type="button" class="btn btn-success btn-sm mt-2" id="addEmploymentRow">Add Row</button>
+</br>
+    <br>
     <button type="button" class="btn btn-secondary prev-step" data-prev="2">Previous</button>
     <button type="button" class="btn btn-primary next-step" data-next="4">Next</button>
 </div>

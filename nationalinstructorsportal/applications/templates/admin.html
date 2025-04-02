@@ -155,7 +155,7 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i> {{ request.user.username }}
+                            {% comment %} <i class="fas fa-user-circle me-1"></i> {{ request.user.email }} {% endcomment %}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
@@ -191,15 +191,16 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="{% url 'admin_list' %}" class="nav-link">
+                                <i class="fas fa-users"></i> Administrators
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="{% url 'reports' %}" class="nav-link">
                                 <i class="fas fa-chart-bar"></i> Reports
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{% url 'settings' %}" class="nav-link">
-                                <i class="fas fa-cog"></i> Settings
-                            </a>
-                        </li>
+                        
                     </ul>
                     <hr>
                     <div class="text-center">
@@ -336,6 +337,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-header">
