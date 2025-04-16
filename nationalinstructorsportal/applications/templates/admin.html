@@ -141,27 +141,15 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-bell"></i>
-                            <span class="badge bg-danger rounded-pill">3</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><h6 class="dropdown-header">Notifications</h6></li>
-                            <li><a class="dropdown-item" href="#">5 new applications</a></li>
-                            <li><a class="dropdown-item" href="#">3 pending reviews</a></li>
-                            <li><a class="dropdown-item" href="#">System update available</a></li>
-                        </ul>
-                    </li>
+                  
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
-                            {% comment %} <i class="fas fa-user-circle me-1"></i> {{ request.user.email }} {% endcomment %}
+                            <i class="fas fa-user-circle me-1"></i> {{ request.user.email }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                           
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'admin:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="{% url 'login' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -219,8 +207,8 @@
                         <div class="card stat-card">
                             <div class="card-body">
                                 <div class="stat-value">{{ total_applications }}</div>
-                                <div class="stat-label">Total Applications</div>
-                                <i class="fas fa-file-alt fa-2x mt-3 text-primary"></i>
+                                {% comment %} <div class="stat-label">Total Applications</div> {% endcomment %}
+                                {% comment %} <i class="fas fa-file-alt fa-2x mt-3 text-primary"></i> {% endcomment %}
                             </div>
                         </div>
                     </div>
@@ -228,8 +216,8 @@
                         <div class="card stat-card">
                             <div class="card-body">
                                 <div class="stat-value">{{ pending_applications }}</div>
-                                <div class="stat-label">Pending</div>
-                                <i class="fas fa-clock fa-2x mt-3 text-warning"></i>
+                                {% comment %} <div class="stat-label">Pending</div> {% endcomment %}
+                                {% comment %} <i class="fas fa-clock fa-2x mt-3 text-warning"></i> {% endcomment %}
                             </div>
                         </div>
                     </div>
@@ -237,8 +225,8 @@
                         <div class="card stat-card">
                             <div class="card-body">
                                 <div class="stat-value">{{ approved_applications }}</div>
-                                <div class="stat-label">Approved</div>
-                                <i class="fas fa-check-circle fa-2x mt-3 text-success"></i>
+                                {% comment %} <div class="stat-label">Approved</div> {% endcomment %}
+                                {% comment %} <i class="fas fa-check-circle fa-2x mt-3 text-success"></i> {% endcomment %}
                             </div>
                         </div>
                     </div>
@@ -246,8 +234,8 @@
                         <div class="card stat-card">
                             <div class="card-body">
                                 <div class="stat-value">{{ rejected_applications }}</div>
-                                <div class="stat-label">Rejected</div>
-                                <i class="fas fa-times-circle fa-2x mt-3 text-danger"></i>
+                                {% comment %} <div class="stat-label">Rejected</div> {% endcomment %}
+                                {% comment %} <i class="fas fa-times-circle fa-2x mt-3 text-danger"></i> {% endcomment %}
                             </div>
                         </div>
                     </div>
@@ -272,7 +260,7 @@
                             </div>
                             <div class="card-body">
                                 <a href="{% url 'view_applications' %}" class="btn btn-primary w-100 mb-2">
-                                    <i class="fas fa-search me-2"></i> Review Applications
+                                    <i class="fas fa-search me-2"></i> View Applications
                                 </a>
                                 <a href="{% url 'user_management' %}" class="btn btn-secondary w-100 mb-2">
                                     <i class="fas fa-user-plus me-2"></i> Add New User
@@ -280,9 +268,9 @@
                                 <a href="{% url 'reports' %}" class="btn btn-success w-100 mb-2">
                                     <i class="fas fa-download me-2"></i> Generate Reports
                                 </a>
-                                <a href="#" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
+                                {% comment %} <a href="#" class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#bulkAssignModal">
                                     <i class="fas fa-users me-2"></i> Bulk Assign
-                                </a>
+                                </a> {% endcomment %}
                             </div>
                         </div>
                     </div>

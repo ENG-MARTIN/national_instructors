@@ -1,5 +1,5 @@
 from django import forms
-from .models import Admin, Application
+from .models import Admin, Application, Payment, StudentTestimonial
 from .models import CustomUser
 from django.contrib.auth.forms import UserCreationForm
 
@@ -19,7 +19,6 @@ class DITTEApplicationForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter phone number'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email'}),
             'marital_status': forms.Select(attrs={'class': 'form-select'}),
-            'children': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter number of children'}),
             'religion': forms.Select(attrs={'class': 'form-select'}),
             'next_of_kin': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter next of kin details'}),
             'education_background': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter education background'}),
@@ -73,3 +72,31 @@ class AdminRegisterForm(UserCreationForm):
     class Meta:
         model = Admin
         fields = ['email', 'password1', 'password2', 'role', 'full_name', 'phone_number']
+
+
+
+class StudentTestimonialForm(forms.ModelForm):
+    class Meta:
+        model = StudentTestimonial
+        fields = ['name', 'image_document']
+
+    def clean_image_document(self):
+        file = self.cleaned_data.get('image_document')
+        if file:
+            if not file.name.endswith('.pdf'):
+                raise forms.ValidationError("Only PDF files are allowed.")
+            if file.size > 5 * 1024 * 1024:  # 5MB max
+                raise forms.ValidationError("File size should not exceed 5MB.")
+        return file
+    
+    
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = ['surname', 'other_names', 'email', 'receipt']
+        widgets = {
+            'surname': forms.TextInput(attrs={'class': 'form-control'}),
+            'other_names': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'receipt': forms.FileInput(attrs={'class': 'form-control'}),
+        }

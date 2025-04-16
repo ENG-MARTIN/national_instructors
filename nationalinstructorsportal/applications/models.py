@@ -1,8 +1,10 @@
 from django.db import models
 # from . import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser
-
+import os
 import uuid
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
 # Create your models here.
 
@@ -25,7 +27,7 @@ class Application(models.Model):
         ('divorced', 'Divorced'),
         ('widowed', 'Widowed')
     ])
-    children = models.IntegerField()
+    children = models.IntegerField(null=True, blank=True)
     religion = models.CharField(max_length=100)
 
     # Step 2: Education Background
@@ -43,7 +45,8 @@ class Application(models.Model):
         ('Electrical Engineering', 'Electrical Engineering'),
         ('Leather Tanning & Leather Goods Production', 'Leather Tanning & Leather Goods Production'),
         ('Metal Fabrication', 'Metal Fabrication'),
-        ('Tailoring and Garments Design', 'Tailoring and Garments Design')
+        ('Tailoring and Garments Design', 'Tailoring and Garments Design'),
+        ('Electronics Engineering','Electronics Engineering'),
     ])
     programme_status = models.CharField(max_length=50, choices=[
         ('Full Time Government (1 Year)', 'Full Time Government (1 Year)'),
@@ -79,6 +82,9 @@ class Application(models.Model):
     endorser_signature = models.CharField(max_length=255, null=True, blank=True)
     official_stamp = models.CharField(max_length=255, null=True, blank=True)
 
+ #========= pdf
+    education_pdfs = models.ManyToManyField('EducationDocument', blank=True, related_name='application_pdfs')   
+    
     def __str__(self):
         return f"{self.surname} {self.other_names}"
 
@@ -119,7 +125,7 @@ class CustomUser(AbstractBaseUser):
     nationality = models.CharField(max_length=50)
     dob = models.DateField()
     sex = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female')])
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
     objects = CustomUserManager()
@@ -144,15 +150,91 @@ class CustomUser(AbstractBaseUser):
     # custom admin model
 
 class Admin(AbstractUser):
-    # Remove the password field (it's already in AbstractUser)
     role = models.CharField(max_length=50)
     full_name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=15, unique=True)
-
-    # Use email as the username field
     USERNAME_FIELD = 'email'
-    # Require these fields when creating a user
     REQUIRED_FIELDS = ['full_name', 'role', 'phone_number', 'username']  # Add username here
 
     def __str__(self):
         return self.full_name
+    
+
+def validate_pdf_file(value):
+    if not value.name.endswith('.pdf'):
+        raise ValidationError('Only PDF files are allowed.')
+    if value.size > 5 * 1024 * 1024:  # 5MB limit
+        raise ValidationError('File too large (max 5MB)')
+
+def education_pdf_upload_path(instance, filename):
+    return os.path.join('education_pdfs', str(instance.application.id), filename)
+
+class EducationDocument(models.Model):
+    application = models.ForeignKey('Application', on_delete=models.CASCADE, related_name='education_documents')
+    pdf_file = models.FileField(
+        upload_to='education_documents/%Y/%m/%d/',
+        validators=[
+            FileExtensionValidator(allowed_extensions=['pdf']),
+        ]
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Education Document for {self.application.surname}"
+
+    def delete(self, *args, **kwargs):
+        # Delete the file from storage when the model is deleted
+        storage, path = self.pdf_file.storage, self.pdf_file.path
+        super().delete(*args, **kwargs)
+        storage.delete(path)
+
+def education_image_upload_path(instance, filename):
+    return f'education_images/app_{instance.application.id}/{uuid.uuid4().hex[:8]}_{filename}'
+
+class EducationImage(models.Model):
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='education_images')
+    image_file = models.ImageField(upload_to=education_image_upload_path)
+    original_filename = models.CharField(max_length=255)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Education Image for {self.application.email}"
+
+    def delete(self, *args, **kwargs):
+        # Delete the file from storage when the model is deleted
+        storage, path = self.image_file.storage, self.image_file.path
+        super().delete(*args, **kwargs)
+        storage.delete(path)
+
+
+class AcademicDocument(models.Model):
+    surname = models.CharField(max_length=100)
+    other_names = models.CharField(max_length=100)
+    email = models.EmailField()
+    document = models.FileField(upload_to='academic_documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.surname} {self.other_names} - {self.document.name}"
+
+class StudentTestimonial(models.Model):
+    name = models.CharField(max_length=100)
+    image_document = models.FileField(upload_to='testimonials/')
+
+    def __str__(self):
+        return self.name
+    
+
+class Payment(models.Model):
+    surname = models.CharField(max_length=100)
+    other_names = models.CharField(max_length=100)
+    email = models.EmailField()
+    receipt = models.FileField(
+        upload_to='payment_receipts/',
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        help_text="Only PDF files are allowed"
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.surname} {self.other_names}"

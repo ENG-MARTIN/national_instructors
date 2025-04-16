@@ -223,7 +223,6 @@
 </head>
 <body>
     <div class="admin-container">
-        <!-- Page Header -->
         <div class="page-header">
             <div>
                 <h1 class="page-title">
@@ -237,8 +236,8 @@
                 </nav>
             </div>
             <div>
-                <a href="#" class="btn btn-admin btn-admin-primary">
-                    <i class="fas fa-plus me-2"></i>Add New User
+                <a href="{% url "register_admin" %}" class="btn btn-admin btn-admin-primary">
+                    <i class="fas fa-plus me-2"></i>Add New Administrator
                 </a>
             </div>
         </div>
@@ -249,7 +248,7 @@
                 <h5 class="mb-0">User List</h5>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Search users..." style="width: 250px;">
+                    <input type="text" class="form-control" id="userSearchInput"  placeholder="Search users..." style="width: 250px;">
                 </div>
             </div>
             <div class="card-body p-0">
@@ -385,6 +384,25 @@
                 });
             });
         });
+        
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('userSearchInput');
+            const table = document.querySelector('.table-admin tbody');
+            
+            input.addEventListener('keyup', function () {
+                const filter = input.value.toLowerCase();
+                const rows = table.querySelectorAll('tr');
+    
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        });
+    </script>
+    
 </body>
 </html>

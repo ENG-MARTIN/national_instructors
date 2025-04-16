@@ -7,14 +7,19 @@
     <title>DITTE Application Form</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+       
         body {
             background-color: #f8f9fa;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;    
         }
-        .container{
+        
+        .container {
             margin: 20px;
-
-
         }
         .card {
             border-radius: 15px;
@@ -96,6 +101,17 @@
                     </li>
                 </ul>
 
+                <!-- Display Bootstrap alerts -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas {% if message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
                 <!-- Tab Content -->
                 <div class="tab-content" id="myTabContent">
                     <!-- Application Tab -->
@@ -104,7 +120,7 @@
                         <form method="post" id="multiStepForm" class="mt-3" action="{% url 'apply_ditte' %}">
                             {% csrf_token %}  
                             <!-- Progress Indicator -->
-                            <div class="d-flex justify-content-between mb-4">
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                                 <button type="button" class="btn btn-outline-primary step-indicator active" data-step="1">1. Personal Info</button>
                                 <button type="button" class="btn btn-outline-primary step-indicator" data-step="2">2. Education</button>
                                 <button type="button" class="btn btn-outline-primary step-indicator" data-step="3">3. Employment</button>
@@ -112,6 +128,7 @@
                                 <button type="button" class="btn btn-outline-primary step-indicator" data-step="5">5. Sponsorship</button>
                                 <button type="button" class="btn btn-outline-primary step-indicator" data-step="6">6. Declaration</button>
                             </div>
+                            
                 
                             <!-- Step 1: Personal Information -->
                             <div class="step active" id="step1">
@@ -181,10 +198,10 @@
                                         <option value="widowed">Widowed</option>
                                     </select>
                                 </div>
-                                <div class="mb-3">
+                                {% comment %} <div class="mb-3">
                                     <label class="form-label">Number of Children</label>
                                     <input type="number" class="form-control" name="children" required>
-                                </div>
+                                </div> {% endcomment %}
                                 <div class="mb-3">
                                     <label class="form-label">Religious Affiliation</label>
                                     <input type="text" class="form-control" name="religion" required>
@@ -218,22 +235,93 @@
                                     <input type="text" class="form-control" name="major_subjects" required>
                                 </div>
                                 <br>
+                                
+
+                                {% comment %} this is the adding of pdfs  {% endcomment %}    
+                                <div class="mt-3">
+                                    <label class="form-label">Upload Academic Documents (PDF)</label>
+                                    <input type="file" class="form-control" id="academicDocument" accept=".pdf" required>
+                                    <small class="text-muted">Please upload your academic documents in PDF format</small>
+                                    <button type="button" id="uploadDocumentBtn" class="btn btn-primary mt-2">Upload Document</button>
+                                    <div id="uploadStatus" class="mt-2"></div>
+                                </div>
+                                
+                                <!-- Hidden field to store document ID -->
+                                <input type="hidden" name="academic_document_id" id="academicDocumentId">
+                                
                                 <button type="button" class="btn btn-secondary prev-step" data-prev="1">Previous</button>
                                 <button type="button" class="btn btn-primary next-step" data-next="3">Next</button>
-                            </div>
-
-
                             <input type="hidden" name="education_backgrounds" id="educationBackgrounds">
-
+                            </div>
                             <!-- Hidden input to store serialized employment data -->
-                            <input type="hidden" name="employment_records" id="employmentRecords">
-                
+                            <input type="hidden" name="employment_records" id="employmentRecords">  
+                            
+                            
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const uploadBtn = document.getElementById('uploadDocumentBtn');
+                                    const fileInput = document.getElementById('academicDocument');
+                                    const uploadStatus = document.getElementById('uploadStatus');
+                                    const academicDocumentId = document.getElementById('academicDocumentId');
+                                    
+                                    uploadBtn.addEventListener('click', function() {
+                                        if (fileInput.files.length === 0) {
+                                            uploadStatus.innerHTML = '<div class="alert alert-danger">Please select a file first</div>';
+                                            return;
+                                        }
+                                        
+                                        // Get CSRF token
+                                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                                        
+                                        // Create FormData object
+                                        const formData = new FormData();
+                                        formData.append('academic_document', fileInput.files[0]);
+                                        formData.append('surname', document.querySelector('[name=surname]').value);
+                                        formData.append('other_names', document.querySelector('[name=other_names]').value);
+                                        formData.append('email', document.querySelector('[name=email]').value);
+                                        formData.append('csrfmiddlewaretoken', csrfToken);
+                                        
+                                        // Show loading state
+                                        uploadBtn.disabled = true;
+                                        uploadBtn.textContent = 'Uploading...';
+                                        uploadStatus.innerHTML = '<div class="alert alert-info">Uploading document, please wait...</div>';
+                                        
+                                        // Make AJAX request
+                                        fetch('/upload-academic-document/', {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {
+                                                'X-Requested-With': 'XMLHttpRequest'  // Helps Django identify AJAX requests
+                                            }
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                uploadStatus.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                                                academicDocumentId.value = data.document_id;  // Store document ID for form submission
+                                            } else {
+                                                uploadStatus.innerHTML = `<div class="alert alert-danger">${data.error || 'Upload failed'}</div>`;
+                                            }
+                                        })
+                                        .catch(error => {
+                                            uploadStatus.innerHTML = '<div class="alert alert-danger">Error uploading document</div>';
+                                            console.error('Error:', error);
+                                        })
+                                        .finally(() => {
+                                            uploadBtn.disabled = false;
+                                            uploadBtn.textContent = 'Upload Document';
+                                        });
+                                    });
+                                });
+                                </script>
+                           
+
                             <!-- Step 3: Employment Record -->
-<div class="step" id="step3">
-    <h5 class="text-primary">Employment Record (if applicable)</h5>
-    <div class="table-responsive">
-        <table class="table table-bordered" id="employmentTable">
-            <thead>
+                <div class="step" id="step3">
+                    <h5 class="text-primary">Employment Record (if applicable)</h5>
+                    <div class="table-responsive">
+                    <table class="table table-bordered" id="employmentTable">
+                     <thead>
                 <tr>
                     <th>Institution</th>
                     <th>Role</th>
@@ -268,6 +356,8 @@
             <option value="Leather Tanning & Leather Goods Production">Leather Tanning & Leather Goods Production</option>
             <option value="Metal Fabrication">Metal Fabrication</option>
             <option value="Tailoring and Garments Design">Tailoring and Garments Design</option>
+            <option value="Electronics Engineering">Electronics Engineering</option>
+
         </select>
     </div>
     <div class="mb-3">
@@ -307,37 +397,46 @@
                 
                             <!-- Step 6: Declaration and Endorsement -->
                             <div class="step" id="step6">
-                                <h5 class="text-primary">For Admin use only</h5>
+                                <div class="container mt-5">
+                                    <div class="row">
+                                        <div class="col-md-6 offset-md-3">
+                                            <div class="card">
+                                                <div class="card-header bg-primary text-white">
+                                                    <h4>Upload Payment Receipt</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <form method="post" enctype="multipart/form-data">
+                                                        {% csrf_token %}
+                                                        
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Surname</label>
+                                                            {{ form.surname }}
+                                                        </div>
+                                
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Other Names</label>
+                                                            {{ form.other_names }}
+                                                        </div>
+                                
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Email</label>
+                                                            {{ form.email }}
+                                                        </div>
+                                
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Payment Receipt</label>
+                                                            {{ form.receipt }}
+                                                        </div>
+                                
+                                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <br>
-                                {% comment %} <div class="mb-3">
-                                    <label class="form-label">Signature</label>
-                                    <input type="text" class="form-control" name="declaration_signature" required>
-                                </div>
-                                <h5 class="text-primary">Endorsement</h5>
-                                <div class="mb-3">
-                                    <label class="form-label">Endorser's Name</label>
-                                    <input type="text" class="form-control" name="endorser_name" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Designation</label>
-                                    <input type="text" class="form-control" name="endorser_designation" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Institution/Organization</label>
-                                    <input type="text" class="form-control" name="endorser_institution" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Address</label>
-                                    <input type="text" class="form-control" name="endorser_address" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Signature</label>
-                                    <input type="text" class="form-control" name="endorser_signature" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Official Stamp</label>
-                                    <input type="text" class="form-control" name="official_stamp" required>
-                                </div> {% endcomment %}
+                                
                                 <button type="button" class="btn btn-secondary prev-step" data-prev="5">Previous</button>
                                 <button type="submit" class="btn btn-success">Submit Application</button>
                             </div>
@@ -384,74 +483,86 @@
                             <h5 class="text-primary">Payment Information</h5>
                             <p>Payment details and history will be displayed here.</p>
                         </div>
-                    </div>
-
-                    <!-- Admissions Tab -->
-                    <div class="tab-pane fade" id="admissions" role="tabpanel" aria-labelledby="admissions-tab">
-                        <div class="mt-3">
-                            <h5 class="text-primary">Admissions Information</h5>
-                            <p>Admissions-related information will be displayed here.</p>
-                        </div>
-                    </div>
+                    </div>                    
 
                      <!-- Profile Tab -->
-<div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-    <div class="mt-3">
-        <h5 class="text-primary">Profile Information</h5>
-        <div class="welcome-message">
-            <h1>Welcome, {{ user.surname }} {{ user.other_names }}!</h1>
-            <p>You are logged in as <strong id="user-email">{{ user.email }}</strong>.</p>
-        </div>
-
-        <!-- Display Applications -->
-<div class="mt-4">
-    <h5 class="text-primary">Your Applications</h5>
-    {% if applications %}
-        <!-- In your application_form.html where you display applications -->
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Application ID</th>
-            <th>Programme</th>
-            <th>Status</th>
-            <th>Submission Date</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for application in applications %}
-            <tr>
-                <td>{{ application.id }}</td>
-                <td>{{ application.programme }}</td>
-                <td>
-                    <span class="badge 
-                        {% if application.status == 'Pending' %} bg-warning 
-                        {% elif application.status == 'Approved' %} bg-success 
-                        {% elif application.status == 'Rejected' %} bg-danger 
-                        {% endif %}">
-                        {{ application.status }}
-                    </span>
-                </td>
-                <td>{{ application.submission_date }}</td>
-                <td>
-                    <a href="{% url 'view_application_details' application.id %}" 
-                       class="btn btn-sm btn-primary">
-                        View Details
-                    </a>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-    {% else %}
-        <p>No applications found.</p>
-    {% endif %}
-</div>
-
+                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="mt-3">
+                            <!-- Header Section with Logout Button -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="text-primary">Profile Information</h5>
+                                <a href="{% url 'login' %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </div>
+                    
+                            <!-- Welcome Card -->
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-body">
+                                    <div class="welcome-message">
+                                        <h3 class="card-title">Welcome, {{ user.surname }} {{ user.other_names }}!</h3>
+                                        <p class="card-text text-muted">
+                                            <i class="bi bi-envelope"></i> Logged in as <strong id="user-email">{{ user.email }}</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <!-- Applications Section -->
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-primary">Your Applications</h5>
+                                    <span class="badge bg-secondary">{{ applications|length }} application(s)</span>
+                                </div>
+                    
+                                {% if applications %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Application ID</th>
+                                                    <th>Programme</th>
+                                                    <th>Status</th>
+                                                    <th>Submission Date</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for application in applications %}
+                                                    <tr>
+                                                        <td class="fw-bold">#{{ application.id }}</td>
+                                                        <td>{{ application.programme }}</td>
+                                                        <td>
+                                                            <span class="badge 
+                                                                {% if application.status == 'Pending' %} bg-warning text-dark
+                                                                {% elif application.status == 'Approved' %} bg-success
+                                                                {% elif application.status == 'Rejected' %} bg-danger
+                                                                {% endif %}">
+                                                                {{ application.status }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ application.submission_date|date:"M d, Y" }}</td>
+                                                        <td>
+                                                            <a href="{% url 'view_application_details' application.id %}" 
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                <i class="bi bi-eye"></i> View
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info" role="alert">
+                                        <i class="bi bi-info-circle"></i> No applications found. Would you like to <a href="{% url "apply_ditte" %}" class="alert-link">start a new application</a>?
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -511,8 +622,9 @@
             });
         });
     </script>
-
-    {% comment %} for adding rows {% endcomment %}
+ 
+ 
+ {% comment %} for adding rows {% endcomment %}
 <script>
     // Function to add a new row to the education table
     document.getElementById('addEducationRow').addEventListener('click', function () {
@@ -549,6 +661,7 @@
         }
     });
 </script>
+
 
 <script>
     // Function to serialize table data
@@ -684,5 +797,6 @@
             });
     });
 </script>
+
 </body>
 </html>

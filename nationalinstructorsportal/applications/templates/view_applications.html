@@ -177,6 +177,7 @@
     .search-box {
         position: relative;
         margin-bottom: 20px;
+        display:flex;
     }
     
     .search-box input {
@@ -191,6 +192,7 @@
         left: 15px;
         top: 12px;
         color: #adb5bd;
+        display:flex;
     }
     
     .pagination .page-item .page-link {
@@ -231,6 +233,25 @@
             margin-bottom: 15px;
         }
     }
+    .view-modal .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .view-modal .detail-group {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+    .view-modal .detail-group:last-child {
+      border-bottom: none;
+    }
+    .view-modal .detail-label {
+      font-weight: 600;
+      color: #495057;
+    }
+    .view-modal .detail-value {
+      color: #212529;
+    }
 </style>
 
 </head>
@@ -262,7 +283,7 @@
         <h5 class="mb-0">Application List</h5>
         <div class="search-box">
           <i class="fas fa-search"></i>
-          <input type="text" class="form-control" placeholder="Search applications..." style="width: 250px;">
+         <input type="text" class="form-control" id="applicationSearch" placeholder="Search applications..." style="width: 250px;">          <button class="btn btn-sm btn-outline-secondary ms-2" id="clearSearch">Clear</button>
         </div>
       </div>
       <div class="card-body p-0">
@@ -317,6 +338,9 @@
                     </a>
                     <a href="#" class="action-btn action-view" title="View">
                       <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="view_documents" class="action-btn" title="PDF">
+                      <i class="fas fa-file"></i>
                     </a>
                     <a href="#" class="action-btn action-delete" title="Delete">
                       <i class="fas fa-trash-alt"></i>
@@ -378,7 +402,6 @@
     </div>
   </div>
 
-  <!-- Edit Application Modal -->
   <!-- Endorser Details Modal -->
 <div class="modal fade" id="endorserModal" tabindex="-1" aria-labelledby="endorserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -417,6 +440,123 @@
             </form>
         </div>
     </div>
+</div>
+
+ <!-- New View Application Modal -->
+ <div class="modal fade view-modal" id="viewApplicationModal" tabindex="-1" aria-labelledby="viewApplicationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="viewApplicationModalLabel">Application Details</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row mb-4">
+            <div class="col-md-2">
+              <img id="viewAppAvatar" src="" class="img-thumbnail rounded-circle" alt="Applicant Avatar" width="100">
+            </div>
+            <div class="col-md-10">
+              <h3 id="viewAppName"></h3>
+              <span class="badge" id="viewAppStatus"></span>
+              <p class="text-muted mb-0">Application ID: <span id="viewAppId"></span></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="detail-group">
+                <h5 class="mb-3"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Gender:</div>
+                  <div class="col-8 detail-value" id="viewAppGender"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Date of Birth:</div>
+                  <div class="col-8 detail-value" id="viewAppDob"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Nationality:</div>
+                  <div class="col-8 detail-value" id="viewAppNationality"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Contact:</div>
+                  <div class="col-8 detail-value" id="viewAppContact"></div>
+                </div>
+              </div>
+
+              <div class="detail-group">
+                <h5 class="mb-3"><i class="fas fa-graduation-cap me-2"></i>Education</h5>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Highest Qualification:</div>
+                  <div class="col-8 detail-value" id="viewAppQualification"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Institution:</div>
+                  <div class="col-8 detail-value" id="viewAppInstitution"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Year Completed:</div>
+                  <div class="col-8 detail-value" id="viewAppYearCompleted"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="detail-group">
+                <h5 class="mb-3"><i class="fas fa-book me-2"></i>Programme Details</h5>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Programme:</div>
+                  <div class="col-8 detail-value" id="viewAppProgramme"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Status:</div>
+                  <div class="col-8 detail-value" id="viewAppProgrammeStatus"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Start Date:</div>
+                  <div class="col-8 detail-value" id="viewAppStartDate"></div>
+                </div>
+              </div>
+
+              <div class="detail-group">
+                <h5 class="mb-3"><i class="fas fa-user-tie me-2"></i>Endorser Details</h5>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Name:</div>
+                  <div class="col-8 detail-value" id="viewAppEndorserName"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Designation:</div>
+                  <div class="col-8 detail-value" id="viewAppEndorserDesignation"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Institution:</div>
+                  <div class="col-8 detail-value" id="viewAppEndorserInstitution"></div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-4 detail-label">Address:</div>
+                  <div class="col-8 detail-value" id="viewAppEndorserAddress"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <h5 class="mb-3"><i class="fas fa-file-alt me-2"></i>Documents</h5>
+            <div class="row" id="viewAppDocuments">
+              <!-- Documents will be added here dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="printApplicationBtn">
+          <i class="fas fa-print me-2"></i>Print
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
   <!-- Bootstrap JS Bundle with Popper -->
@@ -494,6 +634,151 @@
         
         // Your existing JavaScript code remains here
     });
+  </script>
+
+  {% comment %} displaying the applucations in detail {% endcomment %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize modals
+        const endorserModal = new bootstrap.Modal(document.getElementById('endorserModal'));
+        const viewApplicationModal = new bootstrap.Modal(document.getElementById('viewApplicationModal'));
+        
+        // View button click handler
+        document.querySelectorAll('.action-view').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const row = this.closest('tr');
+                const appId = row.querySelector('td:first-child').textContent;
+                
+                // Set basic application info
+                document.getElementById('viewAppId').textContent = appId;
+                document.getElementById('viewAppName').textContent = 
+                    row.querySelector('td:nth-child(2) .fw-medium').textContent;
+                document.getElementById('viewAppGender').textContent = 
+                    row.querySelector('td:nth-child(2) small').textContent;
+                document.getElementById('viewAppNationality').textContent = 
+                    row.querySelector('td:nth-child(3) .mb-1').textContent;
+                document.getElementById('viewAppDob').textContent = 
+                    row.querySelector('td:nth-child(3) small').textContent;
+                document.getElementById('viewAppProgramme').textContent = 
+                    row.querySelector('td:nth-child(4) .fw-medium').textContent;
+                document.getElementById('viewAppProgrammeStatus').textContent = 
+                    row.querySelector('td:nth-child(4) small').textContent;
+                
+                // Set status badge
+                const statusBadge = document.getElementById('viewAppStatus');
+                const status = row.querySelector('td:nth-child(5) .status-badge').textContent.trim();
+                statusBadge.textContent = status;
+                statusBadge.className = 'badge ' + row.querySelector('td:nth-child(5) .status-badge').className.replace('status-badge', '');
+                
+                // Set avatar
+                document.getElementById('viewAppAvatar').src = 
+                    row.querySelector('td:nth-child(2) img').src;
+                
+                // Fetch additional details (you would replace this with actual data from your backend)
+                fetch(`/get_application_details/${appId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Populate additional fields from the fetched data
+                        document.getElementById('viewAppContact').textContent = data.contact || 'N/A';
+                        document.getElementById('viewAppQualification').textContent = data.qualification || 'N/A';
+                        document.getElementById('viewAppInstitution').textContent = data.institution || 'N/A';
+                        document.getElementById('viewAppYearCompleted').textContent = data.year_completed || 'N/A';
+                        document.getElementById('viewAppStartDate').textContent = data.start_date || 'N/A';
+                        document.getElementById('viewAppEndorserName').textContent = data.endorser_name || 'N/A';
+                        document.getElementById('viewAppEndorserDesignation').textContent = data.endorser_designation || 'N/A';
+                        document.getElementById('viewAppEndorserInstitution').textContent = data.endorser_institution || 'N/A';
+                        document.getElementById('viewAppEndorserAddress').textContent = data.endorser_address || 'N/A';
+                        
+                        // Populate documents
+                        const documentsContainer = document.getElementById('viewAppDocuments');
+                        documentsContainer.innerHTML = '';
+                        if (data.documents && data.documents.length > 0) {
+                            data.documents.forEach(doc => {
+                                const docCol = document.createElement('div');
+                                docCol.className = 'col-md-4 mb-2';
+                                docCol.innerHTML = `
+                                    <div class="card">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-file-pdf text-danger me-2 fs-4"></i>
+                                                <div>
+                                                    <div class="fw-bold">${doc.name}</div>
+                                                    <small class="text-muted">${doc.type}</small>
+                                                </div>
+                                            </div>
+                                            <a href="${doc.url}" class="stretched-link" target="_blank"></a>
+                                        </div>
+                                    </div>
+                                `;
+                                documentsContainer.appendChild(docCol);
+                            });
+                        } else {
+                            documentsContainer.innerHTML = '<p class="text-muted">No documents uploaded</p>';
+                        }
+                        
+                        // Show modal
+                        viewApplicationModal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching application details:', error);
+                        // Show modal with basic info even if fetch fails
+                        viewApplicationModal.show();
+                    });
+            });
+        });
+        
+        // Print button handler
+        document.getElementById('printApplicationBtn').addEventListener('click', function() {
+            window.print();
+        });                    
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('applicationSearch');
+      const clearButton = document.getElementById('clearSearch');
+      const tableRows = document.querySelectorAll('.table-admin tbody tr');
+      
+      // Function to filter table rows
+      function filterTable() {
+          const searchTerm = searchInput.value.toLowerCase();
+          
+          tableRows.forEach(row => {
+              const cells = row.querySelectorAll('td');
+              let rowMatches = false;
+              
+              // Check each cell except the last one (actions column)
+              for (let i = 0; i < cells.length - 1; i++) {
+                  const cellText = cells[i].textContent.toLowerCase();
+                  if (cellText.includes(searchTerm)) {
+                      rowMatches = true;
+                      break;
+                  }
+              }
+              
+              // Show/hide row based on match
+              row.style.display = rowMatches ? '' : 'none';
+          });
+      }
+      
+      // Event listener for search input
+      searchInput.addEventListener('input', function() {
+          filterTable();
+      });
+      
+      // Clear search button
+      clearButton.addEventListener('click', function() {
+          searchInput.value = '';
+          filterTable();
+      });
+      
+      // Optional: Add debouncing for better performance
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(filterTable, 300);
+      });
+  });
   </script>
 </body>
 </html>

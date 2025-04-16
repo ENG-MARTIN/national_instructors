@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Success</title>
+</head>
+<body>
+    <h2>Upload Successful!</h2>
+
+    <p><strong>Name:</strong> {{ testimonial.name }}</p>
+    <p><strong>Uploaded PDF:</strong></p>
+    <iframe src="{{ testimonial.image_document.url }}" width="100%" height="600px" style="border: 1px solid #ccc;">
+        This browser does not support PDFs. Please download the PDF to view it:
+        <a href="{{ testimonial.image_document.url }}">Download PDF</a>
+    </iframe>
+    
+    <br>
+    <a href="{% url 'upload_testimonial' %}">Upload Another</a>
+</body>
+</html>

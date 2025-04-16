@@ -4,146 +4,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>NATIONAL INSTRUCTORS' COLLEGE | Admin Registration</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #007b7f;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ff6b6b;
+        }
+        
         body {
-            background: linear-gradient(to right, #4facfe, #00f2fe);
-            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #d7e3fc 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
         }
-
-        .register-container {
-            max-width: 450px;
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        
+        .registration-container {
+            max-width: 600px;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin: 2rem auto;
+        }
+        
+        .logo {
             text-align: center;
+            margin-bottom: 1.5rem;
         }
-
-        .register-container h5 {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
+        
+        .logo img {
+            width: 100px;
+            height: auto;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+            padding: 5px;
         }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 15px;
+        
+        .title {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-
-        .input-group {
-            border-radius: 8px;
-        }
-
-        .input-group-text {
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px 0px 0px 8px;
-            padding: 10px 15px;
-        }
-
+        
         .form-control {
-            border-radius: 0px 8px 8px 0px;
-            padding: 10px;
-            font-size: 14px;
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
         }
-
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 127, 0.25);
+        }
+        
         .btn-register {
-            background: linear-gradient(135deg, #007bff, #00d4ff);
+            background-color: var(--primary-color);
             color: white;
-            font-weight: bold;
-            border: none;
+            width: 100%;
             padding: 12px;
             border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: none;
         }
-
+        
         .btn-register:hover {
-            background: linear-gradient(135deg, #0056b3, #00a8cc);
+            background-color: #006266;
         }
-
-        .alert-info {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border-radius: 5px;
+        
+        .footer {
             text-align: center;
-            font-size: 14px;
-            margin-bottom: 15px;
+            margin-top: 2rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .form-label {
             font-weight: 500;
         }
-
-        a {
-            color: #007bff;
-            text-decoration: none;
+        
+        .input-group-text {
+            background-color: white;
+            border-right: none;
         }
-
-        a:hover {
-            text-decoration: underline;
+        
+        .input-group .form-control {
+            border-left: none;
         }
-
-        .text-muted {
-            font-size: 13px;
-            margin-top: 15px;
+        
+        .password-toggle {
+            cursor: pointer;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .role-select {
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <div class="alert-info">
-            {% if errors %}
-                <strong>ERRORS:</strong>
-                <ul>
-                    {% for field, error_list in errors.items %}
-                        {% for error in error_list %}
-                            <li><strong>{{ field|title }}</strong>: {{ error }}</li>
-                        {% endfor %}
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <strong>IMPORTANT:</strong> Please provide accurate information as it cannot be edited later.
+    <div class="container">
+        <div class="registration-container">
+            <div class="logo">
+                <img src="{% static 'images/logo.jpeg' %}" alt="College Logo">
+                <h3 class="title mt-3">ADMIN REGISTRATION</h3>
+                <p class="text-muted">Create your administrator account</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas {% if message.tags == 'danger' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
             {% endif %}
+
+            <form method="POST" action="{% url 'register_admin' %}">
+                {% csrf_token %}                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="full_name" class="form-label">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="full_name" name="full_name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-at"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                               placeholder="256XXXXXXXXX" required>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select role-select" id="role" name="role" required>
+                        <option value="" selected disabled>Select your role</option>
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Administrator">Administrator</option>
+                        <option value="Support Staff">Support Staff</option>
+                        <option value="Data Entry">Data Entry</option>
+                    </select>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3 password-container">
+                        <label for="password1" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password1" name="password1" required>
+                            <span class="password-toggle" onclick="togglePassword('password1')">
+                                <i class="fas fa-eye" id="toggleIcon1"></i>
+                            </span>
+                        </div>
+                        <div class="form-text">At least 8 characters</div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3 password-container">
+                        <label for="password2" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password2" name="password2" required>
+                            <span class="password-toggle" onclick="togglePassword('password2')">
+                                <i class="fas fa-eye" id="toggleIcon2"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-register">
+                        <i class="fas fa-user-plus me-2"></i> REGISTER
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p>Already have an account? <a href="{% url 'adminlogin' %}" class="text-decoration-none">Login here</a></p>
+            </div>
+            
+            <div class="footer">
+                <p>© 2025 - HEMIS Consortium. All Rights Reserved.</p>
+            </div>
         </div>
-        
-        <h5>Admin Register</h5>
-        <form method="POST" action="{% url "register_admin" %}">
-            {% csrf_token %}
-            <label for="email">Email</label>
-    <input type="email" name="email" required><br>
-
-    <label for="password">Password</label>
-    <input type="password" name="password" required><br>
-
-    <label for="password2">Confirm Password</label>
-    <input type="password" name="password2" required><br>
-
-    <label for="role">Role</label>
-    <input type="text" name="role" required><br>
-
-    <label for="full_name">Full Name</label>
-    <input type="text" name="full_name" required><br>
-
-    <label for="phone_number">Phone Number</label>
-    <input type="text" name="phone_number" required><br>
-
-            <button type="submit">Register</button>
-          </form>
-        
-        <p class="mt-3">
-            Already Registered? <a href="{% url 'login' %}">Log in Here</a>
-        </p>
-
-        <p class="text-muted">© 2025 - HEMIS Consortium. All Rights Reserved.</p>
     </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const passwordInput = document.getElementById(fieldId);
+            const toggleIcon = document.getElementById(`toggleIcon${fieldId.slice(-1)}`);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

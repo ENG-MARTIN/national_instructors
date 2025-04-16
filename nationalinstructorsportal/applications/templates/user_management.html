@@ -249,7 +249,9 @@
                 <h5 class="mb-0">User List</h5>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Search users..." style="width: 250px;">
+                    <input type="text" class="form-control" id="userSearch" placeholder="Search users..." style="width: 250px;">
+                    <button class="btn btn-sm btn-outline-secondary ms-2" id="clearUserSearch" style="display: none;">
+                        <i class="fas fa-times"></i>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -384,6 +386,85 @@
                     }
                 });
             });
+        });
+
+        {% comment %} search {% endcomment %}
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('userSearch');
+            const clearButton = document.getElementById('clearUserSearch');
+            const tableRows = document.querySelectorAll('.table-admin tbody tr');
+            
+            // Create no results row
+            const noResultsRow = document.createElement('tr');
+            noResultsRow.className = 'no-results';
+            noResultsRow.innerHTML = `
+                <td colspan="6" class="text-center py-4">
+                    <i class="fas fa-search me-2"></i>No matching users found
+                </td>
+            `;
+            noResultsRow.style.display = 'none';
+            document.querySelector('.table-admin tbody').appendChild(noResultsRow);
+            
+            // Function to filter users
+            function filterUsers() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let hasMatches = false;
+                
+                // Show/hide clear button
+                clearButton.style.display = searchTerm ? 'block' : 'none';
+                
+                tableRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let rowMatches = false;
+                    
+                    // Check each cell except the actions column (last one)
+                    for (let i = 0; i < cells.length - 1; i++) {
+                        const cellText = cells[i].textContent.toLowerCase();
+                        if (cellText.includes(searchTerm)) {
+                            rowMatches = true;
+                            hasMatches = true;
+                            break;
+                        }
+                    }
+                    
+                    row.style.display = rowMatches ? '' : 'none';
+                });
+                
+                // Show no results message if no matches
+                noResultsRow.style.display = hasMatches || !searchTerm ? 'none' : '';
+                
+                // Update pagination info text
+                updatePaginationInfo();
+            }
+            
+            // Update pagination info text
+            function updatePaginationInfo() {
+                const visibleRows = document.querySelectorAll('.table-admin tbody tr[style=""]').length;
+                const totalRows = tableRows.length;
+                const paginationInfo = document.querySelector('.card-footer-admin .text-muted');
+                
+                if (paginationInfo) {
+                    if (searchInput.value.trim()) {
+                        paginationInfo.textContent = `Showing ${visibleRows} of ${totalRows} filtered users`;
+                    } else {
+                        paginationInfo.textContent = `Showing ${users.start_index} to ${users.end_index} of ${users.paginator.count} entries`;
+                    }
+                }
+            }
+            
+            // Event listeners
+            searchInput.addEventListener('input', function() {
+                filterUsers();
+            });
+            
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                filterUsers();
+                searchInput.focus();
+            });
+            
+            // Initialize
+            filterUsers();
         });
     </script>
 </body>

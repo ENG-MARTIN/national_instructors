@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Documents Repository</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .document-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+        }
+        
+        .pdf-icon {
+            color: var(--accent-color);
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+        
+        .document-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .document-meta i {
+            width: 16px;
+            text-align: center;
+            margin-right: 5px;
+        }
+        
+        .btn-view {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-view:hover {
+            background-color: #2980b9;
+            color: white;
+        }
+        
+        .btn-download {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-download:hover {
+            background-color: #1a252f;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #adb5bd;
+            margin-bottom: 1rem;
+        }
+        
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 2rem;
+        }
+        
+        .file-size {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-book-open me-2"></i> NATIONAL INSTRUCTORS' COLLEGE ABILONINO</h1>
+                    <p class="mb-0">Browse and download all submitted academic materials</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="search-box">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search documents...">
+                <button class="btn btn-primary" id="searchButton" type="button">Search</button>
+            </div>
+        </div>
+        
+        <div id="documentsContainer">
+            {% if documents %}
+                <div class="row" id="documentsRow">
+                    {% for document in documents %}
+                    <div class="col-md-6 col-lg-4 document-card-container">
+                        <div class="card document-card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="fas fa-user-graduate me-1"></i>
+                                    {{ document.surname }}, {{ document.other_names }}
+                                </span>
+                                <span class="badge bg-light text-dark">
+                                    {{ document.uploaded_at|date:"M d" }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <i class="fas fa-file-pdf pdf-icon"></i>
+                                    <div>
+                                        <h5 class="card-title mb-1">{{ document.document.name|cut:"academic_documents/"|truncatechars:30 }}</h5>
+                                        
+                                    </div>
+                                </div>
+                                
+                                <div class="document-meta mb-3">
+                                    <div><i class="fas fa-envelope"></i> {{ document.email }}</div>
+                                    <div><i class="fas fa-clock"></i> Uploaded: {{ document.uploaded_at|date:"M d, Y H:i" }}</div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white d-flex justify-content-between">
+                                <a href="{{ document.document.url }}" target="_blank" class="btn btn-view btn-sm">
+                                    <i class="fas fa-eye me-1"></i> View
+                                </a>
+                                <a href="{{ document.document.url }}" download class="btn btn-download btn-sm">
+                                    <i class="fas fa-download me-1"></i> Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <h3>No Documents Found</h3>
+                    <p class="text-muted">There are currently no academic documents in the repository.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const documentCards = document.querySelectorAll('.document-card-container');
+        
+        // Function to perform search
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            let hasResults = false;
+            
+            documentCards.forEach(card => {
+                const cardText = card.textContent.toLowerCase();
+                if (cardText.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Show no results message if needed
+            const emptyState = document.querySelector('.empty-state');
+            const documentsRow = document.getElementById('documentsRow');
+            
+            if (!hasResults && documentsRow) {
+                if (!emptyState) {
+                    const newEmptyState = document.createElement('div');
+                    newEmptyState.className = 'empty-state';
+                    newEmptyState.innerHTML = `
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No Matching Documents Found</h3>
+                        <p class="text-muted">No documents match your search criteria.</p>
+                    `;
+                    documentsRow.parentNode.insertBefore(newEmptyState, documentsRow.nextSibling);
+                }
+            } else {
+                if (emptyState && emptyState.parentNode === document.getElementById('documentsContainer')) {
+                    emptyState.remove();
+                }
+            }
+        }
+        
+        // Event listeners
+        searchButton.addEventListener('click', performSearch);
+        
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Initial check for empty state (in case of JavaScript filtering)
+        if (documentCards.length === 0 && !document.querySelector('.empty-state')) {
+            const documentsContainer = document.getElementById('documentsContainer');
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <i class="fas fa-folder-open"></i>
+                <h3>No Documents Found</h3>
+                <p class="text-muted">There are currently no academic documents in the repository.</p>
+            `;
+            documentsContainer.appendChild(emptyState);
+        }
+    });
+    </script>
+    
+    <style>
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        margin: 20px 0;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h3 {
+        color: #343a40;
+        margin-bottom: 10px;
+    }
+    
+    .document-card-container {
+        transition: all 0.3s ease;
+    }
+    
+    /* Add any additional styles you need */
+    </style>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="mb-0">© {% now "Y" %} Academic Documents Repository. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
